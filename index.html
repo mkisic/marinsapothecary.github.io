@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marin's Apothecary - Cocktail Menu</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="images/marins-apothecary-logo.png" alt="Marin's Apothecary - No Doctor's Note Required" class="logo-image">
+        </div>
+    </header>
+    
+    <main id="menu-container">
+        <!-- Menu content will be populated by JavaScript -->
+    </main>
+
+    <footer>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '<div id="loading-indicator">Loading menu...</div>';
+            
+            try {
+                const response = await fetch('menu_data.json');
+                const menuData = await response.json();
+                
+                if (response.ok && menuData) {
+                    container.innerHTML = '';
+                    menuData.forEach(category => {
+                        const categoryElement = document.createElement('section');
+                        categoryElement.className = 'category';
+                        
+                        // Parse category title and description
+                        const titleMatch = category.title.match(/^([^(]+)(?:\s*\((.*)\))?/);
+                        const mainTitle = titleMatch[1].trim();
+                        const description = titleMatch[2] ? titleMatch[2].trim() : '';
+                        
+                        categoryElement.innerHTML = `
+                            <div class="category-title-container">
+                                <h2 class="category-title">${mainTitle}</h2>
+                                ${description ? `<p class="category-description">${description}</p>` : ''}
+                            </div>
+                            <div class="cocktails-grid">
+                                ${category.cocktails.map(cocktail => `
+                                    <article class="cocktail-card">
+                                        <img class="cocktail-image" src="${cocktail.image}" alt="${cocktail.name}" 
+                                             onerror="this.src='placeholder.jpg'">
+                                        <div class="cocktail-info">
+                                            <h3 class="cocktail-name">${cocktail.name}</h3>
+                                            <p class="cocktail-ingredients">${cocktail.ingredients}</p>
+                                        </div>
+                                    </article>
+                                `).join('')}
+                            </div>
+                        `;
+                        
+                        container.appendChild(categoryElement);
+                    });
+                } else {
+                    throw new Error('Failed to load menu data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="error-message">Failed to load menu. Please refresh the page to try again.</div>';
+            }
+        });
+    </script>
+</body>
+</html> 
